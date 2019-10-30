@@ -1,4 +1,5 @@
 from selenium import webdriver
+from nltk.parse import CoreNLPParser
 from JobFinder.lib import utilities as utils
 import re
 import os
@@ -78,8 +79,21 @@ class Crawler(ABC):
             exit(1)
 
     @abstractmethod
-    def get_job(self, base_url):
+    def get_job(self):
         pass
+
+    def process_links(self, job_links):
+        for link in job_links:
+            job = {'link': link}
+            self.browser.get(link)
+            job['title'] = self.find_title()
+            job['category'] = self.find_categories()
+            job['location'] = self.find_locations()
+            job['apply_link'] = self.find_apply_link()
+            job['description'] = self.find_description()
+            job['minimum'] = self.find_minimum()
+            job['preferred'] = self.find_preferred()
+            self.save(job)
 
     @abstractmethod
     def find_title(self):
@@ -98,26 +112,40 @@ class Crawler(ABC):
         pass
 
     @abstractmethod
-    def find_title(self):
+    def find_req(self):
         pass
 
+    @abstractmethod
+    def find_responsibility(self):
+        pass
+
+    @abstractmethod
+    def find_minimum(self):
+        pass
+
+    @abstractmethod
+    def find_preferred(self):
+        pass
+
+    @abstractmethod
+    def parse_years_and_degrees(self):
+        pass
 
     # save job
-    @abstractmethod
     def save(self, job):
-        pass
+        self.collection.insert_one(job)
 
     # must call this before call get_job_level
     @abstractmethod
-    def get_job_years_and_degrees(self,job):
+    def parse_years_and_degrees(self,job):
         pass
 
-    def get_job_level(self, job):
+    def parse_level(self, job):
         # first try to find something from title
         title = job['title']
         
         # see if there is all level key word in the title
-        all_level = re.search('all.*level',title.lower())
+        all_level = re.search('all.*level', title.lower())
         if all_level:
             return utils.LEVEL_LIST
         

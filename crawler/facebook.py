@@ -1,10 +1,16 @@
 from JobFinder.crawler.base.crawler import Crawler
+from pymongo import MongoClient
+from JobFinder.lib.utilities import MONGO_STRING
 import re
 
-class FacebookCrawler(Crawler):
 
+class FacebookCrawler(Crawler):
     def __init__(self, driver_type=None, driver_path=None):
         super().__init__(driver_type, driver_path)
+        self.client = MongoClient(MONGO_STRING)
+        self.collection = self.client.jobs.facebook
+        if self.collection.drop():
+            self.collection = self.client.jobs.facebook
 
     def get_links(self,element):
         res = []
@@ -12,30 +18,22 @@ class FacebookCrawler(Crawler):
             res.append(jl.get_attribute('href'))
         return res
 
-    def get_job(self, base_url):
+    def get_job(self):
         base_url = 'https://www.facebook.com/careers/jobs?page=1&results_per_page=100#search_result'
         self.browser.get(base_url)
         num_text = self.browser.find_element_by_xpath("//div[@class='_6ci_']").text
         job_num = int(re.search('\d+', num_text).group())
-
-        for i in range(1, int(job_num / 100) + 1):
-            url = 'https://www.facebook.com/careers/jobs?page=' + str(i) + '&results_per_page=100#search_result'
-            try:
+        try:
+            for i in range(1, int(job_num / 100) + 1):
+                url = 'https://www.facebook.com/careers/jobs?page=' + str(i) + '&results_per_page=100#search_result'
                 self.browser.get(url)
                 job_links = self.get_links(self.browser.find_elements_by_xpath("//div[@id='search_result']/a"))
-                for job_link in job_links:
-
-                    job = {'link': job_link}
-
-                    self.browser.get(job_link)
-
-                    job['title'] = self.find_title()
-                    job['category'] = self.find_categories()
-                    job['location'] = self.find_locations()
-                    job['apply_link'] = self.find_apply_link()
-                    job['description'] = self.find_description()
-                    
-
+                self.process_links(job_links)
+        except Exception as e:
+            print(e)
+            pass
+        finally:
+            self.browser.quit()
 
     def find_title(self):
         return self.browser.find_element_by_xpath("//h4").text
@@ -53,17 +51,38 @@ class FacebookCrawler(Crawler):
         return apply_link.get_attribute('href')
 
     def find_description(self):
-        return self.browser.find_element_by_xpath("//div[@class = '_3m9 _1n-z _6hy- _6ad1']").text
+        return '\n'.join([p.text for p in self.browser.find_elements_by_xpath("//div[@itemprop = 'description']/p")])
 
+    def find_req(self):
+        return self.browser.find_elements_by_xpath("//div[@class = '_3-8q']")
 
+    def find_responsibility(self):
+        elements = self.find_req()
+        return [item.text for item in elements[0].find_elements_by_xpath(".//div[@class = '_1zh- _6ad3']") ]
 
+    def find_minimum(self):
+        elements = self.find_req()
+        return [item.text for item in elements[1].find_elements_by_xpath(".//div[@class = '_1zh- _6ad3']")]
 
-    def get_job_years_and_degrees(self,job):
+    def find_preferred(self):
+        elements = self.find_req()
+        if len(elements) <= 2:
+            return []
+        return [item.text for item in elements[2].find_elements_by_xpath(".//div[@class = '_1zh- _6ad3']")]
+
+    def parse_years_and_degrees(self, job):
+        # req: dict, key: min/preferred, value: list of tuple
+        # tuple :(year, degree, both)
+
+        # that's so fucking complicate, let's just do years
+        # like the data structure below
         years = {'min': 0, 'prefer': 0}
         degrees = {'min': '', 'prefer': ''}
-        
+
+        for item in job['minimum']:
+            lst = item.split(' ')
+
         job['years'] = years
         job['degrees'] = degrees
 
-    def save(self, job):
-        pass
+

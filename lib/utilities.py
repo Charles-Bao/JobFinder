@@ -1,13 +1,13 @@
 DRIVER_TYPE = {
-    'chrome' : 'Chrome',
-    'Chrome' : 'Chrome',
-    'PhatomJS' : 'PhantomJS',
-    'phantom' : 'PhantomJS',
-    'Firefox' : 'Firefox',
-    'firefox' : 'firefox',
+    'chrome': 'Chrome',
+    'Chrome': 'Chrome',
+    'PhatomJS': 'PhantomJS',
+    'phantom': 'PhantomJS',
+    'Firefox': 'Firefox',
+    'firefox': 'firefox',
 }
 
-MONGO_STRING = 'mongodb+srv://<charles>:<950322>@test-cvmal.mongodb.net/test?retryWrites=true&w=majority'
+MONGO_STRING = 'mongodb+srv://charles:950322@test-cvmal.mongodb.net/test?retryWrites=true&w=majority'
 
 WINDOWS_CHROME_DRIVER = '\\drivers\\windows\\chromedriver.exe'
 
@@ -29,13 +29,21 @@ MAC_FIREFOX_DRIVER = ''
 
 
 RE_PATTERNS = {
-    'level' : 'new\s*grad|university\s*grad|associate|entry|junior|senior|staff|principle|fellow|lead|manager'
+    'level' : 'new\s*grad|university\s*grad|associate|entry|junior|senior|staff|principle|fellow|lead|manager',
+    'degree' : ' ms\s | bs\s | bachelor | '
 }
 
-YEAR_LIST = [10,8,5,2,0]
+YEAR_LIST = [10, 8, 5, 2, 0]
 
-LEVEL_LIST = ['manager','priciple','staff','senior','junior','grad']
+LEVEL_LIST = ['manager', 'principle', 'staff', 'senior', 'junior', 'grad']
 
-TYPE_LIST = ['internship', 'full-time','contractor']
+TYPE_LIST = ['internship', 'full-time', 'contractor']
 
 CRAWLER_LIST = ['facebook']
+
+DEGREE_LEVEL = ['bachelor', 'graduate', 'phd']
+
+
+
+
+
