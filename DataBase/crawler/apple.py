@@ -57,6 +57,8 @@ class AppleCrawler(Crawler):
     def find_description(self):
         return self.browser.find_element_by_xpath("//div[@id='jd-job-summary']//span").text
 
+
+
     job['location'] = self.find_locations()
     job['apply_link'] = self.find_apply_link()
     job['minimum'] = self.find_minimum()

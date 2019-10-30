@@ -3,6 +3,7 @@ from JobFinder.DataBase.lib import utilities as utils
 import re
 import os
 import platform
+import time
 from abc import ABC, abstractmethod
 
 # TODO has to deal with the platforms
@@ -84,6 +85,7 @@ class Crawler(ABC):
     def process_link(self, job_link):
         job = {'link': job_link}
         self.browser.get(job_link)
+        time.sleep(2)
         job['title'] = self.find_title()
         job['responsibilities'] = self.find_responsibility()
         job['locations'] = self.find_locations()
@@ -95,10 +97,6 @@ class Crawler(ABC):
 
     @abstractmethod
     def find_title(self):
-        pass
-
-    @abstractmethod
-    def find_categories(self):
         pass
 
     @abstractmethod

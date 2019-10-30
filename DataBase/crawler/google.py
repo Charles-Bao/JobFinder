@@ -13,22 +13,26 @@ class GoogleCrawler(Crawler):
             self.collection = self.client.jobs.google
 
     def get_links(self, li):
-        return [l.get_attribute('href') for l in li]
+        return list(set([l.get_attribute('href') for l in li]))
 
-    def get_job(self,):
+    def get_job(self):
         page = 0
         try:
             while True:
                 page += 1
                 base_url = 'https://careers.google.com/jobs/results/?page=' + str(page)
+                print("at page "+str(page))
                 self.browser.get(base_url)
+                time.sleep(2)
                 cur_links = self.get_links(self.browser.find_elements_by_xpath("//ol/li/a"))
                 if len(cur_links) < 1:
+                    print("no more links")
                     break
                 for job_link in cur_links:
                     job = self.process_link(job_link)
                     job['company'] = self.find_sub_company();
                     self.save(job);
+
         except Exception as e:
             print(e)
             pass
@@ -42,19 +46,19 @@ class GoogleCrawler(Crawler):
         return ""
 
     def find_locations(self):
-        loc_str = self.browser.find_elements_by_xpath("//p[@class='gc-job-detail__instruction-description']/b")
-        if len(loc_str) < 1:
-            loc = self.browser.find_element_by_xpath(
-                "//div[@class='gc-card__header gc-job-detail__header']/ul/li[@itemprop='jobLocation']")
-            return [loc.text]
-
-        return loc_str[0].text.split(';')
+        try:
+            loc_str = self.browser.find_elements_by_xpath("//p[@class='gc-job-detail__instruction-description']/b")
+            if len(loc_str) < 1:
+                loc = self.browser.find_element_by_xpath("//div[@class='gc-card__header gc-job-detail__header']/ul/li[@itemprop='jobLocation']")
+                return [loc.text]
+            return loc_str[0].text.split(';')
+        except Exception as e:
+            print(e, self.browser.current_url)
+        finally:
+            pass
 
     def find_apply_link(self):
-        js = "var q=document.documentElement.scrollTop=200"
-        self.browser.execute_script(js)
-        time.sleep(1)
-        apply_link = self.browser.find_element_by_xpath("//div[@class='gc-job-detail__section--apply-bottom-container']/a")
+        apply_link = self.browser.find_element_by_xpath("//div[@class='gc-card__meta gc-job-detail__meta']/a")
         return apply_link.get_attribute('href')
 
     def find_description(self):
