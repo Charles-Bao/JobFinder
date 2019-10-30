@@ -28,7 +28,10 @@ class FacebookCrawler(Crawler):
                 url = 'https://www.facebook.com/careers/jobs?page=' + str(i) + '&results_per_page=100#search_result'
                 self.browser.get(url)
                 job_links = self.get_links(self.browser.find_elements_by_xpath("//div[@id='search_result']/a"))
-                self.process_links(job_links)
+                for job_link in job_links:
+                    job = self.process_link(job_link)
+                    job['categories'] = self.find_categories();
+                    self.save(job)
         except Exception as e:
             print(e)
             pass
@@ -63,7 +66,7 @@ class FacebookCrawler(Crawler):
         return apply_link.get_attribute('href')
 
     def find_description(self):
-        return '\n'.join([p.text for p in self.browser.find_elements_by_xpath("//div[@itemprop = 'description']/p")])
+        return self.browser.find_element_by_xpath("//div[contains(@class,'_1n-z _6hy- _6ad1')]").text
 
     def find_req(self):
         return self.browser.find_elements_by_xpath("//div[@class = '_3-8q']")

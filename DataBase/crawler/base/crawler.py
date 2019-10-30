@@ -81,18 +81,17 @@ class Crawler(ABC):
     def get_job(self):
         pass
 
-    def process_links(self, job_links):
-        for link in job_links:
-            job = {'link': link}
-            self.browser.get(link)
-            job['title'] = self.find_title()
-            job['category'] = self.find_categories()
-            job['location'] = self.find_locations()
-            job['apply_link'] = self.find_apply_link()
-            job['description'] = self.find_description()
-            job['minimum'] = self.find_minimum()
-            job['preferred'] = self.find_preferred()
-            self.save(job)
+    def process_link(self, job_link):
+        job = {'link': job_link}
+        self.browser.get(job_link)
+        job['title'] = self.find_title()
+        job['responsibilities'] = self.find_responsibility()
+        job['locations'] = self.find_locations()
+        job['apply_link'] = self.find_apply_link()
+        job['description'] = self.find_description()
+        job['minimum'] = self.find_minimum()
+        job['preferred'] = self.find_preferred()
+        return job
 
     @abstractmethod
     def find_title(self):

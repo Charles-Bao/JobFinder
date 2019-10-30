@@ -18,15 +18,17 @@ class GoogleCrawler(Crawler):
     def get_job(self,):
         page = 0
         try:
-            while (True):
+            while True:
                 page += 1
                 base_url = 'https://careers.google.com/jobs/results/?page=' + str(page)
                 self.browser.get(base_url)
                 cur_links = self.get_links(self.browser.find_elements_by_xpath("//ol/li/a"))
                 if len(cur_links) < 1:
                     break
-                self.process_links(cur_links)
-
+                for job_link in cur_links:
+                    job = self.process_link(job_link)
+                    job['company'] = self.find_sub_company();
+                    self.save(job);
         except Exception as e:
             print(e)
             pass
@@ -36,8 +38,8 @@ class GoogleCrawler(Crawler):
     def find_title(self):
         return self.browser.find_element_by_xpath("//div[@class='gc-card__header gc-job-detail__header']/h1").text
 
-    def find_categories(self):
-        return []
+    def find_sub_company(self):
+        return ""
 
     def find_locations(self):
         loc_str = self.browser.find_elements_by_xpath("//p[@class='gc-job-detail__instruction-description']/b")
@@ -56,7 +58,7 @@ class GoogleCrawler(Crawler):
         return apply_link.get_attribute('href')
 
     def find_description(self):
-        return self.browser.find_element_by_xpath("//div[@class = '_3m9 _1n-z _6hy- _6ad1']").text
+        return '\n'.join([p.text for p in self.browser.find_elements_by_xpath("//div[@itemprop = 'description']/p")])
 
     def find_req(self):
         return self.browser.find_element_by_xpath("//div[@itemprop = 'qualifications']")
