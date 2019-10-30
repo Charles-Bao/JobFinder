@@ -1,6 +1,6 @@
-from JobFinder.crawler.base.crawler import Crawler
+from JobFinder.DataBase.crawler.base.crawler import Crawler
 from pymongo import MongoClient
-from JobFinder.lib.utilities import MONGO_STRING
+from JobFinder.DataBase.lib.utilities import MONGO_STRING
 import time
 
 

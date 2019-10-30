@@ -1,6 +1,5 @@
 from selenium import webdriver
-from nltk.parse import CoreNLPParser
-from JobFinder.lib import utilities as utils
+from JobFinder.DataBase.lib import utilities as utils
 import re
 import os
 import platform

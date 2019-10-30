@@ -1,6 +1,6 @@
-from JobFinder.crawler.base.crawler import Crawler
 from pymongo import MongoClient
-from JobFinder.lib.utilities import MONGO_STRING
+from JobFinder.DataBase.lib.utilities import MONGO_STRING
+from JobFinder.DataBase.crawler.base.crawler import Crawler
 import re
 
 
@@ -36,11 +36,23 @@ class FacebookCrawler(Crawler):
             self.browser.quit()
 
     def find_title(self):
-        return self.browser.find_element_by_xpath("//h4").text
+        try:
+            return self.browser.find_element_by_xpath("//h4").text
+        except Exception as e:
+            print(e)
+            print("can't find title in"+self.browser.current_url)
+        finally:
+            pass
 
     def find_categories(self):
-        categories = self.browser.find_elements_by_xpath("//div[@class='_2ke1']/span")
-        return [ c.text for c in categories]
+        try:
+            categories = self.browser.find_elements_by_xpath("//div[@class='_2ke1']/span")
+            return [ c.text for c in categories]
+        except Exception as e:
+            print(e)
+            print("can't find categories in"+self.browser.current_url)
+        finally:
+            pass
 
     def find_locations(self):
         locations = self.browser.find_elements_by_xpath("//span[@class='_3-8r _7vwo']")
