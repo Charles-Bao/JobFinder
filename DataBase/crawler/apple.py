@@ -57,11 +57,33 @@ class AppleCrawler(Crawler):
     def find_description(self):
         return self.browser.find_element_by_xpath("//div[@id='jd-job-summary']//span").text
 
+    def find_apply_link(self):
+        return self.browser.find_element_by_xpath("//div[@id='job-details-actions']/a").get_attribute('href')
+
+    def find_minimum(self):
+        key = [item.text for item in self.browser.find_elements_by_xpath("//ul[@class='jd__list']/li/span")]
+        edu = []
+        try:
+            edu = [item.text for item in self.browser.find_elements_by_xpath("//div[@id='jd-education-experience']/span")]
+        except Exception as e:
+            print("find_minimum")
+            pass
+        finally:
+            key = key + edu
+
+        return key
+
+    #TODO: it seems that every thing in an apple jd is minimum since they are called : key/edu/additional req, wondering which part should be categroized into "preferred"
+    def find_preferred(self):
+        return ""
+
+    def find_responsibility(self):
+        return self.browser.find_element_by_xpath("//div[@id='jd-description']/span").text
+
+    def find_locations(self):
 
 
     job['location'] = self.find_locations()
-    job['apply_link'] = self.find_apply_link()
-    job['minimum'] = self.find_minimum()
     job['preferred'] = self.find_preferred()
 
     def find_date(self):
